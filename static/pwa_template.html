@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Photo-Verified Todo App</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="A Todo app that verifies task completion with photos">
+    <style>
+        /* Add your custom styles here */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .offline-banner {
+            display: none;
+            background-color: #f44336;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div id="offline-banner" class="offline-banner">
+        You are currently offline. Some features may be limited.
+    </div>
+
+    <!-- Streamlit will inject the app content here -->
+    {{ STREAMLIT_APP_CONTENT }}
+
+    <!-- PWA Scripts -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+
+            // Handle online/offline status
+            window.addEventListener('online', () => {
+                document.getElementById('offline-banner').style.display = 'none';
+            });
+
+            window.addEventListener('offline', () => {
+                document.getElementById('offline-banner').style.display = 'block';
+            });
+        }
+
+        // Ask for notification permission
+        function requestNotificationPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted.');
+                    }
+                });
+            }
+        }
+
+        // Call this when appropriate (e.g., after user interaction)
+        // requestNotificationPermission();
+    </script>
+</body>
+</html>
